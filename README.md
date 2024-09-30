@@ -41,7 +41,7 @@ Follow these simple steps to get node-red running.
     ```
 ### Additional Requirements
 
-- NGINX-Ingress/Cert-Manager are required
+- NGINX-Ingress/Cert-Manager are required. If you are using a different Ingress-Controller, you need to delete the ingress-section in node-red.yml. 
 ## License
 
 node-red/node-red is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
