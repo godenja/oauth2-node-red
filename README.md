@@ -1,6 +1,6 @@
 
 
-This repository contains the necessary configurations to deploy a node red with OIDC Support in your Kubernetes Cluster
+This repository contains the necessary configurations to deploy a node-red with generic OIDC Support in your Kubernetes Cluster. 
 
 ## Installation
 
@@ -10,7 +10,10 @@ Follow these simple steps to get node-red running.
 
 1. Open the `node-red-secret.yml` file located in this repository.
 2. Replace the placeholder values with your values. Here's a snippet for reference:
-echo -n 'YOUR_SECRET_VALUE' | base64
+    ```bash
+   echo -n 'YOUR_SECRET_VALUE' | base64
+    ```
+    
     ```yaml
     apiVersion: v1
     kind: Secret
@@ -25,10 +28,10 @@ echo -n 'YOUR_SECRET_VALUE' | base64
 
 ### Step 2: Deploy the Secret and the Kubernetes-Deployment
 
-1. Once your `secrets.yaml` is ready, deploy it using `kubectl`:
+1. Once your `secrets.yml` is ready, deploy it using `kubectl`:
 
     ```bash
-    kubectl apply -f secrets.yaml
+    kubectl apply -f secrets.yml
     ```
 
 2. Next, deploy the application by applying the deployment manifest:
@@ -36,7 +39,9 @@ echo -n 'YOUR_SECRET_VALUE' | base64
     ```bash
     kubectl apply -f node-red.yml
     ```
-    
+### Additional Requirements
+
+- NGINX-Ingress/Cert-Manager are required
 ## License
 
 node-red/node-red is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
