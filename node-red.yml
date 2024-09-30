@@ -23,7 +23,7 @@ spec:
           mountPath: /data
       containers:
       - name: node-red
-        image: your node-red image
+        image: docker pull ghcr.io/godenja/oauth2-node-red:main
         imagePullPolicy: Always
         ports:
         - containerPort: 1880
