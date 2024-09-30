@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-red
+  labels:
+    app: node-red
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node-red
+  template:
+    metadata:
+      labels:
+        app: node-red
+    spec:
+      initContainers:
+      - name: init-permissions
+        image: busybox
+        command: ['sh', '-c', 'chown -R 1000:1000 /data']
+        volumeMounts:
+        - name: nodered-data
+          mountPath: /data
+      containers:
+      - name: node-red
+        image: your node-red image
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 1880
+        env:
+        - name: OAUTH_ALLOWED_ROLE
+          valueFrom:
+            secretKeyRef:
+              name: node-red-secret
+              key: OAUTH_ALLOWED_ROLE
+        - name: OAUTH_ISSUER
+          valueFrom:
+            secretKeyRef:
+              name: node-red-secret
+              key: OAUTH_ISSUER
+        - name: OAUTH_AUTH_URL
+          valueFrom:
+            secretKeyRef:
+              name: node-red-secret
+              key: OAUTH_AUTH_URL
+        - name: OAUTH_TOKEN_URL
+          valueFrom:
+            secretKeyRef:
+              name: node-red-secret
+              key: OAUTH_TOKEN_URL
+        - name: OAUTH_DISCOVERY
+          valueFrom:
+            secretKeyRef:
+              name: node-red-secret
+              key: OAUTH_DISCOVERY
+        - name: OAUTH_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: node-red-secret
+              key: OAUTH_CLIENT_ID
+        - name: OAUTH_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: node-red-secret
+              key: OAUTH_CLIENT_SECRET
+        - name: OAUTH_CALLBACK_URL
+          valueFrom:
+            secretKeyRef:
+              name: node-red-secret
+              key: OAUTH_CALLBACK_URL
+        volumeMounts:
+        - name: nodered-data
+          mountPath: /data
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+      volumes:
+      - name: nodered-data
+        persistentVolumeClaim:
+          claimName: nodered-pvc
+      imagePullSecrets:
+       - name: pullsecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-red
+spec:
+  selector:
+    app: node-red
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 1880
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nodered-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: node-red-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+  - hosts:
+    - example.net
+    secretName: node-red-tls
+  rules:
+  - host: example.net
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: node-red
+            port:
+              number: 1880
+
